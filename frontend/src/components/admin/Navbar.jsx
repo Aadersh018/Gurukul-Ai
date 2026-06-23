@@ -2,9 +2,9 @@ import { Bell } from "lucide-react";
 
 const Navbar = () => {
   return (
-    <div className="h-20 border-b border-slate-800 bg-slate-900 px-8 flex items-center justify-between">
+    <div className="h-18 border-b border-slate-800 bg-slate-900 px-8 flex items-center justify-between">
       <div>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-l font-bold text-white">
           Welcome Admin 👋
         </h2>
 

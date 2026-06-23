@@ -1,7 +1,52 @@
 import { GraduationCap, Brain, FileText, Bell, BarChart3 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await api.post("/auth/login", formData);
+
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+
+      localStorage.setItem("user", JSON.stringify(user));
+
+      switch (user.role) {
+        case "admin":
+          navigate("/admin");
+          break;
+
+        case "faculty":
+          navigate("/faculty");
+          break;
+
+        case "student":
+          navigate("/student");
+          break;
+
+        case "parent":
+          navigate("/parent");
+          break;
+
+        default:
+          navigate("/");
+      }
+    } catch (error) {
+      alert(error?.response?.data?.message || "Login failed");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 flex">
       {/* Left Section */}
@@ -52,7 +97,7 @@ const Login = () => {
               </p>
             </div>
 
-            <form className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-slate-300 mb-2">
                   Email Address
@@ -60,6 +105,14 @@ const Login = () => {
 
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      email: e.target.value,
+                    })
+                  }
                   placeholder="Enter your email"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500"
                 />
@@ -70,6 +123,14 @@ const Login = () => {
 
                 <input
                   type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      password: e.target.value,
+                    })
+                  }
                   placeholder="Enter your password"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500"
                 />

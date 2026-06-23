@@ -1,10 +1,6 @@
-import { useState } from "react";
-import {
-  Users,
-  UserPlus,
-  Search,
-  RefreshCw,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, UserPlus, Search, RefreshCw } from "lucide-react";
+import api from "../../services/api";
 
 const UserManagement = () => {
   const [formData, setFormData] = useState({
@@ -14,24 +10,22 @@ const UserManagement = () => {
     password: "",
   });
 
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Rahul Kumar",
-      email: "rahul@gmail.com",
-      role: "student",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      email: "priya@gmail.com",
-      role: "faculty",
-      status: "Active",
-    },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get("/admin/users");
+
+      setUsers(response.data.users);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -41,9 +35,7 @@ const UserManagement = () => {
   };
 
   const generatePassword = () => {
-    const password = Math.random()
-      .toString(36)
-      .slice(-10);
+    const password = Math.random().toString(36).slice(-10);
 
     setFormData((prev) => ({
       ...prev,
@@ -51,89 +43,63 @@ const UserManagement = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password
-    ) {
+    if (!formData.name || !formData.email || !formData.password) {
       alert("Please fill all fields");
       return;
     }
-
-    const newUser = {
-      id: Date.now(),
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-      status: "Active",
-    };
-
-    setUsers((prev) => [newUser, ...prev]);
-
-    console.log("User Created:", formData);
-
-    setFormData({
-      name: "",
-      email: "",
-      role: "student",
-      password: "",
-    });
+    try {
+      const response = await api.post("/admin/create-user", formData);
+      alert(response.data.message);
+      setFormData({
+        name: "",
+        email: "",
+        role: "student",
+        password: "",
+      });
+      await fetchUsers();
+    } catch (error) {
+      console.log(error);
+      alert(error?.response?.data?.message || "Something went wrong");
+    }
   };
 
   const filteredUsers = users.filter(
     (user) =>
-      user.name
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      user.email
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      user?.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div>
       <div className="max-w-7xl mx-auto">
-
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <Users size={34} className="text-indigo-500" />
 
           <div>
-            <h1 className="text-3xl font-bold text-white">
-              User Management
-            </h1>
+            <h1 className="text-3xl font-bold text-white">User Management</h1>
 
             <p className="text-slate-400">
-              Create and manage students,
-              faculty, and parents.
+              Create and manage students, faculty, and parents.
             </p>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-
           {/* Create User */}
           <div className="lg:col-span-1">
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-
               <div className="flex items-center gap-2 mb-6">
-                <UserPlus
-                  size={22}
-                  className="text-indigo-500"
-                />
+                <UserPlus size={22} className="text-indigo-500" />
 
                 <h2 className="text-xl font-semibold text-white">
                   Create User
                 </h2>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-4"
-              >
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                   type="text"
                   name="name"
@@ -158,17 +124,11 @@ const UserManagement = () => {
                   onChange={handleChange}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500"
                 >
-                  <option value="student">
-                    Student
-                  </option>
+                  <option value="student">Student</option>
 
-                  <option value="faculty">
-                    Faculty
-                  </option>
+                  <option value="faculty">Faculty</option>
 
-                  <option value="parent">
-                    Parent
-                  </option>
+                  <option value="parent">Parent</option>
                 </select>
 
                 <div>
@@ -208,12 +168,8 @@ const UserManagement = () => {
           {/* User List */}
           <div className="lg:col-span-2">
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-                <h2 className="text-xl font-semibold text-white">
-                  All Users
-                </h2>
+                <h2 className="text-xl font-semibold text-white">All Users</h2>
 
                 <div className="relative">
                   <Search
@@ -225,9 +181,7 @@ const UserManagement = () => {
                     type="text"
                     placeholder="Search users..."
                     value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
+                    onChange={(e) => setSearch(e.target.value)}
                     className="bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-white outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -235,62 +189,50 @@ const UserManagement = () => {
 
               <div className="overflow-x-auto">
                 <table className="w-full">
-
                   <thead>
                     <tr className="border-b border-slate-800">
-                      <th className="text-left py-4 text-slate-400">
-                        Name
-                      </th>
+                      <th className="text-left py-4 text-slate-400">Name</th>
 
-                      <th className="text-left py-4 text-slate-400">
-                        Email
-                      </th>
+                      <th className="text-left py-4 text-slate-400">Email</th>
 
-                      <th className="text-left py-4 text-slate-400">
-                        Role
-                      </th>
+                      <th className="text-left py-4 text-slate-400">Role</th>
 
-                      <th className="text-left py-4 text-slate-400">
-                        Status
-                      </th>
+                      <th className="text-left py-4 text-slate-400">Status</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {filteredUsers.map((user) => (
                       <tr
-                        key={user.id}
+                        key={user._id}
                         className="border-b border-slate-800 hover:bg-slate-800/40"
                       >
-                        <td className="py-4 text-white">
-                          {user.name}
-                        </td>
+                        <td className="py-4 text-white">{user.name}</td>
 
-                        <td className="py-4 text-slate-300">
-                          {user.email}
-                        </td>
+                        <td className="py-4 text-slate-300">{user.email}</td>
 
                         <td className="py-4 capitalize">
-                          <span className="text-indigo-400">
-                            {user.role}
-                          </span>
+                          <span className="text-indigo-400">{user.role}</span>
                         </td>
 
                         <td className="py-4">
-                          <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">
-                            {user.status}
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm ${
+                              user.isActive
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-red-500/20 text-red-400"
+                            }`}
+                          >
+                            {user.isActive ? "Active" : "Inactive"}
                           </span>
                         </td>
                       </tr>
                     ))}
                   </tbody>
-
                 </table>
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>
