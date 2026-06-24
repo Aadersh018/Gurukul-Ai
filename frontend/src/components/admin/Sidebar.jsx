@@ -30,6 +30,11 @@ const Sidebar = () => {
       path: "/admin/analytics",
       icon: <BarChart3 size={20} />,
     },
+    {
+      name: "Subjects",
+      path: "/admin/subjects",
+      icon: <BookOpen size={20} />,
+    },
   ];
 
   return (
@@ -41,13 +46,9 @@ const Sidebar = () => {
           </div>
 
           <div>
-            <h1 className="text-xl font-bold text-white">
-              Gurukul AI
-            </h1>
+            <h1 className="text-xl font-bold text-white">Gurukul AI</h1>
 
-            <p className="text-sm text-slate-400">
-              Admin Panel
-            </p>
+            <p className="text-sm text-slate-400">Admin Panel</p>
           </div>
         </div>
       </div>

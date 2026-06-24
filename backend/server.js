@@ -6,6 +6,10 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import classRoutes from "./routes/classRoutes.js";
+import subjectRoutes from "./routes/subjectRoutes.js";
+import assignmentRoutes from "./routes/assignmentRoutes.js";
+import submissionRoutes from "./routes/submissionRoutes.js";
+
 
 
 const app = express();
@@ -28,6 +32,9 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/classes", classRoutes);
+app.use("/api/subjects", subjectRoutes);
+app.use("/api/assignments", assignmentRoutes);
+app.use("/api/submissions", submissionRoutes);
 
 const PORT = process.env.PORT || 8000;
 
